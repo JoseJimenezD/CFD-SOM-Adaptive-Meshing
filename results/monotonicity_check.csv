@@ -1,0 +1,4 @@
+method,rms_strictly_decreases,mean_strictly_decreases
+gradient,True,True
+hybrid,True,True
+som_qe,False,False

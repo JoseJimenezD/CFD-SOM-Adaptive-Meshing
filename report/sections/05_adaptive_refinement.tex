@@ -1,0 +1,283 @@
+\section{Adaptive Mesh Refinement Methodology}
+\label{sec:adaptive_refinement}
+
+Adaptive mesh refinement is a well-established strategy for concentrating
+computational resolution in selected regions of a numerical domain. Classical
+AMR methods provide important historical context for the general concept of
+local refinement \cite{berger1984,berger1989}. The cell-selection indicators
+developed in the present work are not implementations of those classical AMR
+algorithms; they constitute a separate one-shot refinement experiment built
+around the OpenFOAM solution and the SOM-derived information.
+
+\subsection{Controlled comparison}
+
+Three cell-selection strategies were evaluated under identical refinement
+budgets:
+
+\begin{enumerate}
+    \item a conventional velocity-gradient indicator;
+    \item direct refinement based on SOM quantization error (SOM-QE);
+    \item a hybrid indicator combining the velocity gradient with
+    SOM-derived regime-transition information.
+\end{enumerate}
+
+For each method, refinement budgets of 5\%, 10\%, 15\%, and 20\% of the
+1600-cell M40 baseline mesh were considered.
+
+The corresponding numbers of initially selected cells were therefore 80,
+160, 240, and 320 cells, respectively.
+
+The same local refinement operation was applied after cell selection.
+Consequently, the final adaptive meshes contained 1840, 2080, 2320, and
+2560 cells for the four refinement budgets.
+
+This design isolates the effect of the cell-selection criterion: at a given
+budget, each method starts from the same M40 solution, selects the same
+number of cells, and uses the same refinement procedure.
+
+\subsection{Velocity-gradient indicator}
+
+The conventional baseline ranks cells according to the local velocity-gradient
+magnitude,
+
+\begin{equation}
+G_i = |\nabla\mathbf{U}_i|.
+\end{equation}
+
+Cells with the largest values of \(G_i\) are selected until the prescribed
+refinement budget is reached.
+
+This method provides a physically interpretable conventional baseline:
+regions in which the velocity field varies rapidly receive higher refinement
+priority.
+
+\subsection{Direct SOM quantization-error indicator}
+
+The first SOM-based hypothesis uses the cell-level quantization error directly
+as a refinement indicator,
+
+\begin{equation}
+I_{\mathrm{QE},i}=QE_i.
+\end{equation}
+
+Cells with the largest quantization errors are selected first.
+
+This criterion tests whether CFD states that are poorly represented by the
+trained SOM also correspond to locations where additional spatial resolution
+is beneficial.
+
+No fine-grid reference information is used during this selection.
+
+\subsection{SOM regime-transition indicator}
+
+The BMU classification provides a discrete label \(b_i\) for every M40 cell.
+To identify interfaces between different SOM-classified flow states, a local
+transition indicator is defined using the direct structured-grid neighbors of
+cell \(i\):
+
+\begin{equation}
+T_i =
+\frac{
+\displaystyle
+\sum_{j\in\mathcal{N}_i}
+\mathbb{I}(b_j\neq b_i)
+}{
+|\mathcal{N}_i|
+},
+\end{equation}
+
+where \(\mathcal{N}_i\) is the set of existing direct neighbors and
+\(\mathbb{I}\) is the indicator function.
+
+Thus,
+
+\begin{equation}
+0\leq T_i\leq1.
+\end{equation}
+
+A value of zero indicates that all direct neighbors belong to the same SOM
+state, while larger values indicate increasing local interaction between
+different SOM-classified states.
+
+The transition indicator is constructed exclusively from the M40 SOM
+classification. It does not use the M160 reference solution.
+
+The cell-level correlation between the transition indicator and the
+velocity-gradient magnitude was approximately
+
+\begin{equation}
+r(G,T)=0.261,
+\end{equation}
+
+substantially smaller than the correlation between gradient magnitude and
+quantization error,
+
+\begin{equation}
+r(G,QE)=0.879.
+\end{equation}
+
+The transition indicator therefore contains information that is less
+redundant with the conventional gradient criterion than the direct
+quantization error.
+
+\subsection{Hybrid-v1 indicator}
+
+The hybrid indicator was designed to preserve the conventional gradient as
+the primary refinement signal while allowing SOM regime-transition
+information to modify the ranking of cells.
+
+The normalized gradient is defined as
+
+\begin{equation}
+G_i^{*} =
+\frac{G_i}{\max_j G_j}.
+\end{equation}
+
+The Hybrid-v1 indicator is then
+
+\begin{equation}
+I_{\mathrm{hyb},i}
+=
+G_i^{*}
+\left(1+\alpha T_i\right),
+\end{equation}
+
+with
+
+\begin{equation}
+\alpha=0.5.
+\end{equation}
+
+The coefficient was fixed for the Hybrid-v1 experiment and was not optimized
+against the M160 reference.
+
+This distinction is important because tuning the coefficient to minimize
+M160 discrepancies and subsequently evaluating performance against the same
+M160 solution would contaminate the validation comparison.
+
+Hybrid-v1 should therefore be interpreted as a predefined exploratory
+indicator rather than an optimized model.
+
+\subsection{Selection overlap}
+
+Because the gradient remains the dominant component of Hybrid-v1, the hybrid
+criterion modifies only a relatively small fraction of the conventional
+gradient selections.
+
+The overlap between Gradient and Hybrid-v1 selections was
+
+\begin{table}[htbp]
+\centering
+\caption{Overlap between Gradient and Hybrid-v1 cell selections.}
+\label{tab:gradient_hybrid_overlap}
+\begin{tabular}{rrrrr}
+\toprule
+Budget & Selected & Common & Exclusive per method & Overlap \\
+\midrule
+5\%  & 80  & 73  & 7  & 91.25\% \\
+10\% & 160 & 149 & 11 & 93.12\% \\
+15\% & 240 & 227 & 13 & 94.58\% \\
+20\% & 320 & 306 & 14 & 95.62\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Consequently, Hybrid-v1 is not a replacement of the gradient criterion by a
+machine-learning criterion. It is a controlled perturbation of the
+gradient-based ranking using information extracted from SOM flow-state
+boundaries.
+
+
+\subsection{Second-stage SOM-interface refinement criterion}
+
+The results obtained with direct SOM quantization error motivated a change in
+the evaluation question. Rather than treating the SOM as a direct estimator
+of discretization error, the subsequent analysis asked whether the SOM
+classification contains information about \emph{where refinement is likely to
+be useful}.
+
+The BMU field provides a spatial classification of local flow states. Cells
+located at interfaces between different BMU states were therefore considered
+potentially informative because they represent locations where the local flow
+regime changes in the SOM feature space.
+
+For an interface cell, the local transition fraction \(T_i\) was combined
+with two quantities already available from the M40 pilot solution. The first
+was the normalized velocity-gradient magnitude,
+
+\begin{equation}
+G_i^* =
+\frac{G_i}{\max_j G_j},
+\end{equation}
+
+and the second was the normalized maximum velocity-vector jump across a
+direct SOM interface,
+
+\begin{equation}
+\Delta U_i^* =
+\frac{
+\max_{j\in\mathcal{N}_i,\;b_j\neq b_i}
+\|\mathbf{U}_i-\mathbf{U}_j\|_2
+}{
+\max_k \Delta U_k
+}.
+\end{equation}
+
+The resulting SOM-interface ranking was defined as
+
+\begin{equation}
+I_{\mathrm{SI},i}
+=
+T_i
+\sqrt{G_i^*\,\Delta U_i^*}.
+\end{equation}
+
+Only cells for which \(T_i>0\) were eligible for interface selection. The
+highest-ranked 40 interface cells were then frozen as common seeds. Starting
+from exactly those same seeds, the selected refinement region was expanded by
+a fixed graph distance: one face-sharing layer for the \(1N\) case and two
+layers for the \(2N\) case.
+
+This construction deliberately separates two questions. The SOM determines
+\emph{where flow-state transitions occur}, while the gradient and
+velocity-jump terms determine how strongly those transitions are ranked.
+Neither the M160 solution nor any reference-derived error field is used in
+this construction.
+
+The resulting experiments selected 78 cells for \(1N\) and 114 cells for
+\(2N\). These counts were not forced to equal a nominal 10\% budget.
+Instead, they were subsequently reproduced exactly with conventional
+Gradient selection, creating cell-matched controls with identical final
+cell counts. This comparison isolates the spatial-selection mechanism while
+avoiding a confounding difference in total mesh size.
+
+\subsection{Evaluation against the fine-grid reference}
+
+After refinement, each adaptive case is solved independently with OpenFOAM.
+The resulting velocity field is compared with the M160 fine-grid numerical
+reference.
+
+Because the adaptive and reference meshes contain different cell-center
+locations, the M160 solution is interpolated to the adaptive-mesh cell
+centers before the velocity discrepancy is evaluated.
+
+For cell \(i\), the nondimensional velocity-vector discrepancy is
+
+\begin{equation}
+e_i =
+\frac{
+\left\|
+\mathbf{U}_{i,\mathrm{adaptive}}
+-
+\mathbf{U}_{i,\mathrm{M160}}
+\right\|_2
+}{
+U_{\mathrm{lid}}
+}.
+\end{equation}
+
+Since adaptive cells have different volumes, global mean and RMS measures are
+volume weighted.
+
+The M160 solution is used only at this evaluation stage and not during the
+selection of cells for Gradient, SOM-QE, or Hybrid-v1.

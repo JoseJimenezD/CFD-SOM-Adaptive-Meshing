@@ -1,0 +1,80 @@
+\section{CFD Model}
+\label{sec:cfd_model}
+
+\subsection{Benchmark problem}
+
+The two-dimensional lid-driven cavity was selected as the initial benchmark
+problem because it provides a simple geometry while producing a non-trivial
+recirculating incompressible flow field. The problem has also been extensively
+used for the verification and comparison of numerical methods. Classical
+reference solutions and detailed analyses of this benchmark are available in
+Ghia et al., Botella and Peyret, and Shankar and Deshpande
+\cite{ghia1982,botella1998,shankar2000}.
+
+The computational domain is a square cavity with characteristic length
+
+\begin{equation}
+L = 0.1~\mathrm{m}.
+\end{equation}
+
+The upper wall moves in the positive \(x\)-direction with constant velocity
+
+\begin{equation}
+U_{\mathrm{lid}} = 1~\mathrm{m\,s^{-1}},
+\end{equation}
+
+while the remaining cavity walls are stationary. The kinematic viscosity is
+
+\begin{equation}
+\nu = 1.0\times10^{-3}~\mathrm{m^2\,s^{-1}}.
+\end{equation}
+
+The corresponding Reynolds number is therefore
+
+\begin{equation}
+Re =
+\frac{U_{\mathrm{lid}}L}{\nu}
+=
+100.
+\end{equation}
+
+Although the OpenFOAM computational mesh has a finite thickness in the
+\(z\)-direction, the front and back boundaries are defined using the
+\texttt{empty} boundary condition. The calculation therefore represents a
+two-dimensional flow problem.
+
+\subsection{Numerical solution}
+
+The incompressible transient Navier--Stokes equations are solved using
+OpenFOAM v2606. The \texttt{icoFoam} solver is used for the present benchmark.
+The numerical formulation follows the finite-volume framework underlying
+OpenFOAM; general finite-volume CFD methodology is described by Ferziger and
+Peri\'c and by Versteeg and Malalasekera
+\cite{weller1998,ferziger2002,versteeg2007,openfoam2606}.
+
+The velocity field is denoted by \(\mathbf{U}\), and the pressure field by
+\(p\). The governing equations are
+
+\begin{equation}
+\nabla\cdot\mathbf{U}=0,
+\end{equation}
+
+and
+
+\begin{equation}
+\frac{\partial\mathbf{U}}{\partial t}
++
+(\mathbf{U}\cdot\nabla)\mathbf{U}
+=
+-\nabla p
++
+\nu\nabla^2\mathbf{U}.
+\end{equation}
+
+The CFD solution obtained on the initial mesh provides the physical
+information subsequently used to construct conventional and SOM-based
+refinement indicators.
+
+The machine-learning model therefore does not replace the governing
+equations or the CFD solver. Instead, it operates on quantities extracted
+from a physics-based CFD solution.

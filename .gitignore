@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# OpenFOAM generated results
+**/processor*/
+**/postProcessing/
+**/VTK/
+
+# Logs
+*.log
+logs/
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Temporary / backup files
+*.bak
+*.tmp
+*.before_portability

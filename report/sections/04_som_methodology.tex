@@ -1,0 +1,199 @@
+\section{Self-Organizing Map Methodology}
+\label{sec:som_methodology}
+
+\subsection{Purpose of the SOM}
+
+A Self-Organizing Map (SOM) was introduced to investigate whether
+unsupervised learning could identify physically meaningful flow states in the
+CFD solution and whether information derived from those states could
+subsequently contribute to mesh-refinement decisions.
+
+The SOM is an unsupervised neural-network method that maps multidimensional
+input data onto a lower-dimensional discrete lattice while attempting to
+preserve topological relationships in the input space
+\cite{kohonen1982,kohonen2001}. SOM-based clustering and interpretation of
+the trained map have subsequently been developed for exploratory analysis of
+multidimensional data \cite{vesanto2000}.
+
+In the present work, the SOM is not used as a surrogate for the CFD solver.
+The Navier--Stokes equations remain the source of the physical solution.
+Instead, the SOM analyzes quantities extracted from the CFD field.
+
+The initial SOM analysis is performed using the M40 solution, containing
+1600 cells. Importantly, the M160 reference solution is not used during SOM
+training or during the construction of the refinement indicators. It is
+reserved for subsequent evaluation.
+
+The supporting data-analysis workflow was implemented in Python using the
+scientific-computing ecosystem. Array and numerical operations relied on
+NumPy and SciPy, while preprocessing utilities were drawn from
+scikit-learn \cite{harris2020,virtanen2020,pedregosa2011}.
+
+\subsection{Candidate physical features}
+
+For each M40 cell, the CFD post-processing pipeline extracts the cell-center
+coordinates and local flow quantities. The candidate nondimensional
+quantities include
+
+\begin{equation}
+\frac{U_x}{U_{\mathrm{lid}}},
+\qquad
+\frac{U_y}{U_{\mathrm{lid}}},
+\qquad
+\frac{|\mathbf{U}|}{U_{\mathrm{lid}}},
+\qquad
+\frac{L|\nabla\mathbf{U}|}{U_{\mathrm{lid}}},
+\qquad
+\frac{L|\boldsymbol{\omega}|}{U_{\mathrm{lid}}},
+\end{equation}
+
+where
+
+\begin{equation}
+\boldsymbol{\omega}=\nabla\times\mathbf{U}.
+\end{equation}
+
+The velocity-gradient magnitude is computed using the Frobenius norm of the
+velocity-gradient tensor.
+
+Spatial coordinates are deliberately excluded from the SOM input vector.
+Consequently, any spatially coherent classification produced by the SOM must
+arise from similarities in the local flow state rather than from explicit
+knowledge of cell position.
+
+\subsection{Feature selection}
+
+An exploratory correlation analysis showed a strong correlation between the
+velocity-gradient magnitude and the vorticity magnitude,
+
+\begin{equation}
+r\left(|\nabla\mathbf{U}|,|\boldsymbol{\omega}|\right)
+=
+0.981.
+\end{equation}
+
+To reduce this strong redundancy, vorticity was excluded from the first SOM
+input vector.
+
+The resulting feature vector was
+
+\begin{equation}
+\mathbf{x}_i =
+\begin{bmatrix}
+U_{x,i}^{*} &
+U_{y,i}^{*} &
+|\mathbf{U}_i|^{*} &
+|\nabla\mathbf{U}_i|^{*}
+\end{bmatrix}^{T},
+\end{equation}
+
+where the superscript \(^{*}\) denotes physical nondimensionalization using
+the characteristic cavity length and lid velocity.
+
+The velocity magnitude is mathematically related to its two velocity
+components and therefore introduces some redundancy. It was retained in this
+initial investigation to preserve an explicit scalar measure of local flow
+speed. Feature-ablation studies are left for future work.
+
+\subsection{Standardization}
+
+Physical nondimensionalization and machine-learning standardization are
+treated as separate operations.
+
+After nondimensionalization, each SOM feature is standardized according to
+
+\begin{equation}
+z_j =
+\frac{x_j-\mu_j}{\sigma_j},
+\end{equation}
+
+where \(\mu_j\) and \(\sigma_j\) are respectively the mean and standard
+deviation of feature \(j\) over the M40 dataset.
+
+This prevents variables with larger numerical ranges from dominating the
+Euclidean distance used during SOM training.
+
+\subsection{SOM architecture and training}
+
+The SOM consists of a \(4\times4\) rectangular lattice containing 16 neurons.
+The implementation was developed in Python using NumPy, with feature
+standardization performed using \texttt{StandardScaler}.
+
+Training used 20,000 iterations with a fixed random seed of 42 to provide
+reproducibility. The learning rate decreased exponentially from
+
+\begin{equation}
+\alpha_0=0.5
+\end{equation}
+
+to
+
+\begin{equation}
+\alpha_f=0.05,
+\end{equation}
+
+while the neighborhood radius decreased from
+
+\begin{equation}
+\sigma_0=2.0
+\end{equation}
+
+to
+
+\begin{equation}
+\sigma_f=0.5.
+\end{equation}
+
+A Gaussian neighborhood function was used during weight updates.
+
+For each CFD cell, the best-matching unit (BMU) is the neuron whose weight
+vector has the smallest Euclidean distance to the standardized feature
+vector.
+
+\subsection{Quantization error}
+
+The cell-level SOM quantization error is defined as
+
+\begin{equation}
+QE_i =
+\left\|
+\mathbf{z}_i-\mathbf{w}_{b(i)}
+\right\|_2,
+\end{equation}
+
+where \(\mathbf{z}_i\) is the standardized feature vector of cell \(i\) and
+\(\mathbf{w}_{b(i)}\) is the weight vector of its BMU.
+
+For the trained M40 SOM, the mean cell-level quantization error was
+
+\begin{equation}
+\overline{QE}=0.4976,
+\end{equation}
+
+while the maximum value was
+
+\begin{equation}
+QE_{\max}=7.5142.
+\end{equation}
+
+All 16 neurons contained assigned CFD cells after training.
+
+A large quantization error indicates that a CFD state is represented
+relatively poorly by its assigned SOM neuron. It does not, by definition,
+represent CFD discretization error. Distinguishing these two quantities is
+central to the experiments presented later in this report.
+
+\subsection{Interpretation of SOM states}
+
+Despite the exclusion of the spatial coordinates from the training features,
+the resulting BMU assignments form spatially coherent regions when mapped
+back onto the cavity.
+
+This observation indicates that the SOM is identifying recurring local flow
+states rather than arbitrary spatial locations. Different neurons represent
+combinations of velocity direction, velocity magnitude, and velocity-gradient
+magnitude.
+
+The SOM therefore provides a classification of the local physical state.
+Whether this classification contains information useful for adaptive
+refinement is treated as an experimental question rather than an assumption.

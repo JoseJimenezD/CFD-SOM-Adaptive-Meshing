@@ -1,0 +1,247 @@
+\section{Conclusions and Future Work}
+\label{sec:conclusions}
+
+\subsection{Conclusions}
+
+This study investigated whether information extracted by a
+Self-Organizing Map (SOM) could provide useful guidance for adaptive
+mesh refinement in CFD. The two-dimensional lid-driven cavity at
+\(Re=100\) was used as a controlled test problem, and all proposed
+refinement strategies were compared at identical refinement budgets.
+
+Before introducing machine learning, a uniform-mesh convergence study
+was performed using M20, M40, M80, and M160 meshes. The successive
+centerline differences decreased substantially with refinement, with
+observed convergence rates approaching second-order behavior on the
+finer mesh levels. The M160 solution was subsequently used as a
+fine-grid numerical reference rather than as an exact solution.
+
+A \(4\times4\) SOM was trained using flow information extracted from the
+M40 pilot solution. Spatial coordinates were deliberately excluded from
+the SOM input. Nevertheless, the trained map produced spatially coherent
+flow-state regions when its classifications were projected back onto the
+physical cavity. This demonstrates that the SOM learned structured
+relationships among the local flow variables rather than simply
+encoding spatial position.
+
+SOM quantization error initially appeared potentially useful because it
+was concentrated in regions that also exhibited relatively large
+M40--M160 discrepancies. However, the controlled adaptive CFD
+experiments showed that this correspondence was insufficient to make
+quantization error an effective direct refinement indicator.
+
+At all four tested refinement budgets, the conventional velocity-gradient
+criterion produced a lower RMS discrepancy than direct SOM-QE refinement.
+Gradient refinement also improved monotonically with increasing budget,
+whereas SOM-QE exhibited non-monotonic behavior between the 5\% and 10\%
+budgets.
+
+The final adaptive meshes demonstrate that this difference cannot be
+attributed simply to the number of cells. At the 10\% budget, both
+SOM-QE and Gradient produce meshes containing 2080 cells, but they
+allocate those cells differently. The Gradient strategy concentrates
+more resolution near regions of strong velocity variation, while SOM-QE
+allocates part of the same finite refinement budget to additional flow
+states that are unusual in SOM feature space.
+
+The results therefore establish an important distinction:
+
+\begin{equation}
+\text{representation novelty}
+\neq
+\text{discretization error}
+\neq
+\text{refinement utility}.
+\end{equation}
+
+A cell can be unusual from the perspective of an unsupervised
+machine-learning model without being the location where additional
+spatial resolution provides the greatest numerical benefit.
+
+The refinement-benefit analysis reinforces this conclusion. Refining
+cells according to the Gradient criterion improved the solution over
+regions extending beyond the directly selected cells, illustrating the
+global coupling of the CFD solution. Consequently, local indicator
+quality cannot be assessed solely through correlation with a pre-existing
+local discrepancy field.
+
+A second SOM-derived quantity, the regime-transition indicator \(T\),
+was subsequently investigated. Unlike quantization error, this quantity
+was only weakly correlated with the velocity-gradient magnitude and
+therefore represented more distinct information.
+
+This motivated the Hybrid-v1 indicator,
+
+\begin{equation}
+I_{\mathrm{hyb}}
+=
+G^{*}(1+0.5T),
+\end{equation}
+
+in which the conventional Gradient criterion remained dominant and SOM
+information only modified the ranking of cells near the refinement
+threshold.
+
+Hybrid-v1 behaved as intended. Approximately 91--96\% of the
+Gradient-selected cells were preserved, while a small number of
+high-transition cells replaced cells having somewhat larger gradients
+but little SOM-transition activity.
+
+At the 10\% budget, this modification reduced the RMS discrepancy by
+approximately 1.24\% relative to Gradient. However, the improvement was
+not reproduced at the 5\%, 15\%, or 20\% budgets.
+
+Hybrid-v1 therefore does not demonstrate a systematic advantage over
+Gradient refinement.
+
+The principal result of this investigation is consequently not that
+machine learning improves CFD mesh refinement. Instead, the study
+demonstrates that SOM-derived flow-state information can be physically
+structured and complementary to a conventional numerical indicator,
+while also showing that converting such information into reliable
+refinement decisions is a substantially more difficult problem.
+
+For the present \(Re=100\) cavity experiments, the velocity-gradient
+criterion remains the most consistently accurate refinement strategy.
+
+
+\subsection{Second-stage SOM-interface result}
+
+The negative SOM-QE result led to a reformulation of the machine-learning
+hypothesis. Rather than treating quantization error as a direct error
+indicator, the SOM BMU field was used to identify interfaces between
+different learned flow states. A new ranking,
+
+\begin{equation}
+I_{\mathrm{SI}}
+=
+T\sqrt{G^*\Delta U^*},
+\end{equation}
+
+combined the SOM transition fraction with normalized velocity-gradient
+magnitude and the local velocity-vector jump across the interface.
+
+The criterion was evaluated using 40 fixed interface seeds and one- or
+two-layer graph expansion. The resulting selections contained 78 and 114
+cells. Conventional Gradient controls were then constructed with exactly
+the same selected-cell counts, producing final meshes of 1834 and 1942
+cells.
+
+In these cell-matched comparisons, SOM-interface reduced the volume-weighted
+mean velocity discrepancy by approximately \(13.9\%\) and \(18.7\%\), and
+the RMS discrepancy by approximately \(1.4\%\) and \(4.0\%\), for the \(1N\)
+and \(2N\) cases, respectively.
+
+These results represent a change in the evidence compared with the earlier
+SOM-QE experiments. They do not show that SOM information is intrinsically
+superior to gradient-based refinement. Instead, they show that the
+\emph{type} of SOM information used matters: direct representation error
+performed poorly, whereas spatial transitions between learned flow states,
+combined with local physical variation, produced a different and promising
+refinement pattern.
+
+The cell-selection overlap was \(67.95\%\) for \(1N\) and \(64.91\%\) for
+\(2N\). Thus, the observed differences arose from a substantial but not
+complete change in the spatial allocation of the refinement budget.
+
+The refinement-utility analysis further showed that SOM-interface does not
+uniformly outperform Gradient in every spatial subset. Gradient retained
+lower mean post-refinement error in the common and Gradient-only regions,
+while SOM-interface showed lower error in the SOM-only region for the
+\(2N\) case and in the large region selected by neither method. The global
+improvement is therefore interpreted as a property of the coupled CFD
+solution rather than as evidence that every SOM-selected cell has higher
+individual utility.
+
+The appropriate conclusion at this stage is that the SOM-interface
+hypothesis has passed an initial controlled test and merits further
+investigation, but requires validation across additional flow conditions,
+geometries, and independent experiments before any general claim can be
+made.
+
+\subsection{Future Work}
+
+The results suggest that further development should focus on
+\emph{refinement utility} rather than on further tuning of quantization
+error or the Hybrid-v1 coefficient against the existing M160 reference.
+
+The first priority is therefore generalization.
+
+The complete experiment should be repeated at additional Reynolds
+numbers while preserving the methodology and indicator definitions used
+in the present study. This will determine whether the observed behavior
+is specific to the \(Re=100\) flow field or persists as the cavity
+dynamics change.
+
+A second priority is evaluation on a different CFD problem. A useful
+test should introduce different flow structures while remaining simple
+enough to permit systematic mesh verification and controlled reference
+solutions. This would provide a stronger test of whether SOM-derived
+regime information transfers beyond the lid-driven cavity.
+
+Future work should also examine whether refinement utility can be
+estimated more directly. Instead of asking whether a cell has a large
+gradient, a large quantization error, or lies near a SOM regime
+transition, the relevant question is whether refining that cell or
+region produces a measurable improvement in a specified quantity of
+interest.
+
+Conceptually, this corresponds to learning or estimating a mapping of
+the form
+
+\begin{equation}
+\left(
+\text{local flow state},
+\text{numerical indicators},
+\text{mesh state}
+\right)
+\longrightarrow
+\text{expected refinement benefit}.
+\end{equation}
+
+Such a formulation would require carefully designed training data and
+strict separation between model development and final validation.
+
+Additional investigations should include:
+
+\begin{itemize}
+
+    \item repeating the experiment for additional Reynolds numbers;
+
+    \item testing the methodology on at least one different benchmark
+    geometry or flow configuration;
+
+    \item separating spatial and temporal discretization effects through
+    independent time-step refinement;
+
+    \item evaluating quantities of interest in addition to global
+    velocity-field discrepancies;
+
+    \item investigating repeated adaptation cycles rather than only
+    one-shot refinement;
+
+    \item examining alternative SOM feature sets and map sizes through
+    controlled ablation studies;
+
+    \item comparing SOM-derived information with established
+    error-estimation or adaptation methods;
+
+    \item measuring total adaptive-workflow cost, including pilot
+    simulation, feature extraction, machine-learning operations,
+    remeshing, and final CFD solution;
+
+    \item repeating timing measurements before drawing conclusions about
+    computational efficiency.
+
+\end{itemize}
+
+Importantly, future indicator development should avoid optimizing
+parameters against the same fine-grid reference subsequently used for
+evaluation. New hypotheses should be defined using pilot-solution
+information and then tested against independent numerical references.
+
+The longer-term objective is therefore not to replace conventional CFD
+adaptation with a SOM. It is to determine whether learned representations
+of the physical flow contain information that can complement established
+numerical indicators and improve the allocation of computational
+resources in a reproducible and generalizable manner.

@@ -1,0 +1,119 @@
+\section{Numerical Verification}
+\label{sec:verification}
+
+Before evaluating machine-learning-based refinement strategies, a uniform-mesh
+refinement study was performed to establish the numerical behavior of the
+baseline CFD model. Grid-refinement studies and observed-order analyses are
+standard components of CFD solution verification
+\cite{roache1998,celik2008}.
+
+Four structured meshes were considered, denoted M20, M40, M80, and M160.
+Successive refinement approximately halves the characteristic cell spacing
+in each coordinate direction.
+
+\begin{table}[htbp]
+\centering
+\caption{Uniform meshes used for the numerical verification study.}
+\label{tab:uniform_meshes}
+\begin{tabular}{lrrr}
+\toprule
+Mesh & Cells & $\Delta x$ [m] & Minimum $U_x/U_{\mathrm{lid}}$ \\
+\midrule
+M20  & 400    & 0.00500 & -0.198089 \\
+M40  & 1600   & 0.00250 & -0.209591 \\
+M80  & 6400   & 0.00125 & -0.212887 \\
+M160 & 25600  & 0.000625 & -0.213733 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A vertical velocity sampling line located at the horizontal center of the
+cavity,
+
+\begin{equation}
+x/L = 0.5,
+\end{equation}
+
+was used to compare the horizontal velocity component between successive
+meshes.
+
+The resulting inter-grid differences are summarized in
+Table~\ref{tab:grid_convergence}.
+
+\begin{table}[htbp]
+\centering
+\caption{Successive-mesh differences for the vertical centerline velocity
+profile.}
+\label{tab:grid_convergence}
+\begin{tabular}{lrr}
+\toprule
+Mesh comparison & $L_2$ difference & $L_\infty$ difference \\
+\midrule
+M20--M40   & $6.1826\times10^{-3}$ & $1.2598\times10^{-2}$ \\
+M40--M80   & $1.7211\times10^{-3}$ & $3.5090\times10^{-3}$ \\
+M80--M160  & $4.2841\times10^{-4}$ & $8.8600\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The reduction ratios of the successive \(L_2\) differences are approximately
+
+\begin{equation}
+\frac{E_{20,40}}{E_{40,80}} = 3.59,
+\qquad
+\frac{E_{40,80}}{E_{80,160}} = 4.02.
+\end{equation}
+
+For a refinement ratio of approximately two, an observed convergence order
+can be estimated from the successive solution differences, consistent with
+standard grid-refinement verification practice
+\cite{roache1998,celik2008}:
+
+\begin{equation}
+p =
+\frac{\ln(E_h/E_{h/2})}{\ln(2)}.
+\end{equation}
+
+The corresponding observed orders are approximately
+
+\begin{equation}
+p = 1.845
+\end{equation}
+
+for the M20--M40--M80 sequence and
+
+\begin{equation}
+p = 2.006
+\end{equation}
+
+for the M40--M80--M160 sequence.
+
+These results indicate strong convergence of the sampled centerline velocity
+profile, with behavior approaching second order on the finer meshes.
+
+\subsection{Reference solution used in the adaptive-mesh study}
+
+The M160 solution is subsequently used as a fine-grid numerical reference
+for comparisons with the adaptive meshes. It is important to emphasize that
+M160 is not treated as an exact analytical solution or as a formally
+grid-independent solution.
+
+Consequently, quantities reported later as ``error'' relative to M160 should
+more precisely be interpreted as discrepancies with respect to the selected
+fine-grid numerical reference.
+
+\subsection{Verification limitations}
+
+The time step was reduced together with the spatial mesh size during the
+uniform refinement sequence. Therefore, the present refinement study does
+not rigorously separate spatial discretization error from temporal
+discretization effects.
+
+Furthermore, the discontinuity between the moving lid and the stationary
+side walls produces strong gradients near the upper corners of the cavity.
+These regions can dominate pointwise error measures and must be considered
+carefully when interpreting maximum-error metrics.
+
+For these reasons, the verification study is used to establish numerical
+consistency and to define a controlled internal reference for the subsequent
+comparisons, rather than to claim an exact discretization-error estimate.

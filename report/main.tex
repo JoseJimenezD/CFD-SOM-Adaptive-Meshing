@@ -1,0 +1,115 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{microtype}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{
+    \textbf{CFD Mesh Refinement Using Self-Organizing Maps}\\[0.4cm]
+    \large Evaluation of SOM-Based and Hybrid Refinement Indicators\\
+    for the Lid-Driven Cavity
+}
+
+\author{
+    José David Jiménez Díaz\\[0.15cm]
+    \small Independent Engineering Research\\
+    \small Mississauga, Ontario, Canada\\[0.1cm]
+    \small \href{mailto:jd.jimenez.eng@gmail.com}{jd.jimenez.eng@gmail.com}\\
+    \small \href{https://www.linkedin.com/in/josedavidjimenezdiazeng/}
+    {linkedin.com/in/josedavidjimenezdiazeng}\\
+    \small \href{https://github.com/JoseJimenezD/CFD-SOM-Adaptive-Meshing}
+    {github.com/JoseJimenezD/CFD-SOM-Adaptive-Meshing}
+}
+
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This technical report investigates whether information learned by a
+Self-Organizing Map (SOM) can contribute to adaptive mesh-refinement
+decisions in computational fluid dynamics. A two-dimensional lid-driven
+cavity at Reynolds number \(Re=100\) is used as a controlled benchmark,
+with a fine uniform M160 solution serving as a numerical reference for
+post-solution evaluation.
+
+The study first compares conventional velocity-gradient refinement with
+direct refinement based on SOM quantization error (SOM-QE) and with a
+hybrid gradient--SOM indicator under controlled refinement budgets.
+Direct SOM-QE refinement does not outperform the conventional Gradient
+criterion and exhibits non-monotonic behavior with increasing refinement
+budget. This negative result motivates a reformulation of the role of the
+SOM: rather than treating quantization error as a proxy for discretization
+error, the SOM is used to identify spatial transitions between
+SOM-classified flow states.
+
+A SOM-interface indicator is subsequently constructed from BMU-state
+transitions, local velocity-gradient magnitude, and velocity jumps across
+neighboring SOM states. Using a fixed set of 40 priority seeds followed by
+one- and two-neighbor expansion, the resulting adaptive meshes are compared
+with Gradient meshes having matched final cell counts. For this cavity and
+the tested configuration, SOM-interface produces lower mean and RMS
+discrepancies relative to the M160 reference at both matched mesh sizes,
+while Gradient produces slightly lower maximum discrepancies. These results
+are therefore evidence for the tested configuration rather than a claim of
+general superiority.
+
+A controlled sensitivity study further evaluates SOM architectures from
+\(3\times3\) to \(6\times6\), with five random initializations per
+architecture. The density of SOM-state interfaces depends strongly on map
+resolution, while exact top-40 seed selection also exhibits initialization
+sensitivity. However, for the nominal \(4\times4\) SOM, mean spatial
+agreement between seed sets increases from 66.5\% for exact cell matching
+to 89.5\% within one base-grid cell and 96.0\% within two cells, indicating
+that much of the initialization sensitivity corresponds to local shifts
+rather than wholesale relocation of the selected regions.
+
+The study demonstrates a reproducible workflow for separating SOM
+representation quality from numerical refinement utility and for evaluating
+machine-learning-derived mesh indicators without using the numerical
+reference during cell selection. The conclusions remain limited to a
+single laminar benchmark, one Reynolds number, and one-shot adaptive
+refinement; broader CFD cases and repeated adaptation cycles are required
+before assessing general applicability.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\input{sections/02_cfd_model}
+
+\input{sections/03_verification}
+
+\input{sections/04_som_methodology}
+
+\input{sections/05_adaptive_refinement}
+
+\input{sections/06_results}
+
+\input{sections/07_discussion}
+
+\input{sections/08_limitations}
+
+\input{sections/09_conclusions_future_work}
+
+\clearpage
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

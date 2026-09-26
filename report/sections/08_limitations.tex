@@ -1,0 +1,209 @@
+\section{Limitations}
+\label{sec:limitations}
+
+The present study is intended as a controlled computational investigation
+rather than as a demonstration of a generally applicable adaptive-meshing
+method. Several limitations must therefore be considered when interpreting
+the results.
+
+\subsection{Fine-grid numerical reference}
+
+The M160 solution is used throughout the adaptive-mesh analysis as a
+fine-grid numerical reference. It should not be interpreted as an exact
+solution.
+
+Consequently, quantities reported as errors relative to M160 are more
+precisely numerical discrepancies with respect to the finest solution used
+in this study. Although the uniform-mesh sequence showed strong convergence
+toward M160, a remaining discretization error is necessarily present in the
+reference itself.
+
+The results therefore support comparisons between refinement strategies
+under a common reference, but they do not establish absolute discretization
+errors.
+
+\subsection{Spatial and temporal discretization}
+
+The uniform-grid convergence study changed the time step together with the
+spatial resolution. The reported M20--M40, M40--M80, and M80--M160
+differences therefore do not isolate spatial discretization error
+independently from temporal discretization effects.
+
+The observed convergence rates are consistent with strong numerical
+convergence of the tested sequence, particularly on the finer meshes, but
+they should not be interpreted as a rigorous spatial order-of-accuracy
+verification.
+
+A future verification study should independently refine the time step and
+the spatial mesh.
+
+\subsection{Lid-driven-cavity corner behavior}
+
+The moving lid meets stationary side walls at the upper corners of the
+cavity. This discontinuity in the imposed wall velocity generates strong
+local gradients and influences pointwise discrepancy measures.
+
+The largest M40--M160 velocity discrepancy occurs close to the upper-right
+corner, and a substantial fraction of the squared discrepancy is
+concentrated in a relatively small number of cells near the upper boundary.
+
+This behavior can influence both conventional gradient indicators and
+SOM-derived quantities. In particular, the observed correlation between
+quantization error and the M40--M160 discrepancy is partly associated with
+both quantities responding strongly to extreme upper-corner flow states.
+
+For this reason, maximum pointwise discrepancy is not used as the primary
+criterion for comparing adaptive strategies. Volume-weighted mean and RMS
+metrics provide more representative global measures for the present study.
+
+\subsection{Single flow configuration}
+
+All adaptive experiments were performed for the two-dimensional
+lid-driven-cavity problem at
+
+\begin{equation}
+Re=100.
+\end{equation}
+
+The conclusions therefore apply only to the tested configuration.
+
+No evidence is presently available to determine whether the relative
+behavior of Gradient, SOM-QE, and Hybrid-v1 persists at different Reynolds
+numbers, for different geometries, in three-dimensional flows, or for
+problems involving heat transfer, turbulence, compressibility, multiphase
+phenomena, or other physical processes.
+
+Generalization must therefore be tested rather than assumed.
+
+\subsection{SOM architecture and feature selection}
+
+The SOM configuration used in this investigation represents one specific
+model design: a \(4\times4\) map containing 16 neurons and trained using the
+selected velocity and velocity-gradient features.
+
+The present results do not establish that this architecture is optimal.
+
+Similarly, the failure of direct SOM-QE refinement should not be interpreted
+as a general failure of self-organizing maps for adaptive CFD. It establishes
+only that quantization error from the present SOM configuration did not
+provide a superior direct refinement criterion for the tested problem.
+
+Alternative features, SOM dimensions, training procedures, or derived
+indicators may produce different behavior. Such alternatives should,
+however, be defined without tuning against the numerical reference used for
+final evaluation.
+
+\subsection{Hybrid-v1 is not optimized}
+
+Hybrid-v1 uses
+
+\begin{equation}
+I_{\mathrm{hyb}}
+=
+G^{*}(1+0.5T).
+\end{equation}
+
+The coefficient \(\alpha=0.5\) was intentionally fixed rather than optimized
+against M160. This prevents the reference solution from being used both to
+design and evaluate the indicator.
+
+Consequently, Hybrid-v1 should be interpreted as a proof-of-concept test of
+whether SOM regime-transition information can modify a conventional
+indicator in a controlled manner. It is not presented as an optimized
+adaptive-meshing algorithm.
+
+The isolated improvement observed at the 10\% budget is insufficient to
+establish superiority over Gradient.
+
+\subsection{Refinement-budget range}
+
+Only four refinement budgets were investigated:
+
+\begin{equation}
+5\%,\qquad10\%,\qquad15\%,\qquad20\%.
+\end{equation}
+
+These experiments are sufficient to reveal important differences in
+monotonicity and relative behavior, but they do not fully characterize the
+accuracy--cost response of each method.
+
+In particular, the present results should not be extrapolated to very small
+or very large refinement fractions without additional simulations.
+
+\subsection{Computational-cost measurements}
+
+The reported execution times correspond to individual CFD solves and were
+obtained from single runs. They are therefore susceptible to normal
+variability in workstation load and operating-system scheduling.
+
+Furthermore, the timings do not include the complete adaptive workflow,
+which may contain:
+
+\begin{itemize}
+    \item the pilot CFD calculation;
+    \item feature extraction;
+    \item SOM training;
+    \item indicator calculation;
+    \item cell selection;
+    \item mesh refinement;
+    \item field transfer and post-processing.
+\end{itemize}
+
+No claim of computational-speed superiority is therefore made.
+
+A rigorous efficiency study should use repeated timing measurements and
+compare total workflow cost for a specified accuracy or quantity-of-interest
+target.
+
+\subsection{Refinement strategy}
+
+The current framework performs one refinement operation based on information
+from a pilot solution. It does not implement repeated adaptive cycles in
+which the solution is recomputed, the indicator reevaluated, and the mesh
+adapted iteratively.
+
+The results therefore evaluate one-shot refinement decisions rather than a
+fully dynamic adaptive-mesh algorithm.
+
+Multiple adaptation cycles could alter the relative behavior of the tested
+indicators and constitute a separate research question.
+
+
+\subsection{Cell-matched second-stage experiments}
+
+The SOM-interface experiments were deliberately evaluated against
+cell-matched Gradient controls because graph expansion produces selected-cell
+counts that are not equal to the nominal percentage used in the original
+adaptive matrix. The \(1N\) and \(2N\) cases therefore should not be combined
+directly with the original 5--20\% budget curves as if they were additional
+points on the same budget sequence.
+
+The cell-matched design controls final mesh size, but it does not eliminate
+all possible confounding factors. The SOM-interface method uses fixed seeds
+and graph expansion, whereas Gradient directly ranks individual cells.
+Differences in spatial connectivity and refinement topology are therefore
+part of the method being tested.
+
+\subsection{Scope of the conclusions}
+
+The strongest conclusion supported by the present evidence is deliberately
+limited.
+
+For the tested \(Re=100\) lid-driven cavity, the conventional
+velocity-gradient indicator produced the most consistently accurate
+solutions in the original 5--20\% SOM-QE/Hybrid-v1 refinement matrix.
+Direct SOM quantization-error refinement was inferior and non-monotonic,
+while Hybrid-v1 did not demonstrate a systematic advantage.
+
+A subsequent, separately formulated SOM-interface criterion produced lower
+volume-weighted mean and RMS discrepancies than cell-matched Gradient
+controls at 1834 and 1942 cells. These experiments are encouraging but
+remain limited to one geometry, one Reynolds number, one SOM configuration,
+and two graph-expansion choices. They therefore do not establish general
+superiority.
+
+The present evidence supports the narrower conclusion that SOM-derived
+flow-state interfaces can provide information that is complementary to
+velocity-gradient magnitude. Whether this information can be converted into
+a robust and general predictor of refinement utility remains unresolved.
+
