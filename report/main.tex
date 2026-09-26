@@ -70,13 +70,15 @@ general superiority.
 
 A controlled sensitivity study further evaluates SOM architectures from
 \(3\times3\) to \(6\times6\), with five random initializations per
-architecture. The density of SOM-state interfaces depends strongly on map
-resolution, while exact top-40 seed selection also exhibits initialization
-sensitivity. However, for the nominal \(4\times4\) SOM, mean spatial
-agreement between seed sets increases from 66.5\% for exact cell matching
-to 89.5\% within one base-grid cell and 96.0\% within two cells, indicating
-that much of the initialization sensitivity corresponds to local shifts
-rather than wholesale relocation of the selected regions.
+architecture. Increasing map size reduces quantization error but also
+increases SOM-interface density, while partition stability depends on both
+architecture and initialization. Lower quantization error therefore does
+not imply a more stable SOM partition. Exact Top-40 seed selection also
+exhibits initialization sensitivity; for the nominal \(4\times4\) SOM,
+mean spatial agreement increases from 66.5\% for exact cell matching to
+89.5\% within one base-grid cell and 96.0\% within two cells. The
+\(4\times4\) map is consequently treated as the nominal configuration
+rather than as an architecture demonstrated to be optimal.
 
 The study demonstrates a reproducible workflow for separating SOM
 representation quality from numerical refinement utility and for evaluating

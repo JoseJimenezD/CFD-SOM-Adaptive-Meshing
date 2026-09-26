@@ -77,11 +77,19 @@ Generalization must therefore be tested rather than assumed.
 
 \subsection{SOM architecture and feature selection}
 
-The SOM configuration used in this investigation represents one specific
-model design: a \(4\times4\) map containing 16 neurons and trained using the
-selected velocity and velocity-gradient features.
+The adaptive CFD experiments in this investigation use a nominal
+\(4\times4\) SOM containing 16 neurons and trained using the selected
+velocity and velocity-gradient features. A separate sensitivity study
+evaluated \(3\times3\), \(4\times4\), \(5\times5\), and \(6\times6\)
+architectures across five random initializations. That analysis quantified
+changes in representation error, partition stability, interface density,
+and spatial stability of the high-priority interface seeds.
 
-The present results do not establish that this architecture is optimal.
+The sensitivity study does not establish an optimal SOM architecture and
+does not repeat the complete adaptive CFD calculation for every architecture
+and initialization. Consequently, it characterizes robustness of the learned
+SOM partition and refinement-selection structure, rather than robustness of
+the final adaptive CFD accuracy across all tested SOM configurations.
 
 Similarly, the failure of direct SOM-QE refinement should not be interpreted
 as a general failure of self-organizing maps for adaptive CFD. It establishes

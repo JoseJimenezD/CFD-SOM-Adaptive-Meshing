@@ -159,6 +159,34 @@ investigation, but requires validation across additional flow conditions,
 geometries, and independent experiments before any general claim can be
 made.
 
+
+\subsection{SOM architecture sensitivity}
+
+A complementary sensitivity study evaluated \(3\times3\), \(4\times4\),
+\(5\times5\), and \(6\times6\) SOM architectures across five random
+initializations. Increasing the number of neurons reduced quantization error
+but simultaneously increased the fraction of cells classified as SOM
+interfaces. Partition stability also depended on architecture and
+initialization; in particular, the lowest quantization error did not
+correspond to the most stable partition.
+
+The spatial analysis of the 40 highest-priority interface seeds showed that
+exact cell selection can vary appreciably between random initializations,
+while many of the alternative selections remain spatially close. For the
+nominal \(4\times4\) architecture, the mean exact Top-40 Jaccard similarity
+was approximately 0.507, whereas the one- and two-cell-layer proximity match
+fractions were approximately 0.895 and 0.960, respectively.
+
+These results reinforce the distinction between reproducibility and
+robustness. A fixed SOM configuration and random seed can be reproduced
+exactly, but this does not imply invariance to alternative architectures or
+initializations. The sensitivity study therefore supports treating the
+\(4\times4\) SOM as the nominal configuration of the present adaptive
+experiments rather than as an optimized architecture. The complete adaptive
+CFD workflow was not repeated for every sensitivity configuration, so no
+conclusion is drawn regarding which SOM architecture would provide the best
+final adaptive-mesh accuracy.
+
 \subsection{Future Work}
 
 The results suggest that further development should focus on
@@ -220,8 +248,9 @@ Additional investigations should include:
     \item investigating repeated adaptation cycles rather than only
     one-shot refinement;
 
-    \item examining alternative SOM feature sets and map sizes through
-    controlled ablation studies;
+    \item extending the SOM architecture and initialization sensitivity
+    analysis to complete adaptive CFD calculations, while also examining
+    alternative feature sets through controlled ablation studies;
 
     \item comparing SOM-derived information with established
     error-estimation or adaptation methods;
