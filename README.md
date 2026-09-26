@@ -248,7 +248,7 @@ The repository is not intended to contain proprietary employer information, conf
 
 **José David Jiménez Díaz**
 
-Independent Engineering Research
+Independent Personal Project
 Mississauga, Ontario, Canada
 
 Email: jd.jimenez.eng@gmail.com
